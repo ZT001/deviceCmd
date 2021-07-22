@@ -17,6 +17,48 @@ CMD_Add("SAVE", NULL, 0, cSystem, pNone);
 CMD_Add("BACKUP", NULL, 0, cSystem, pNone);	
 CMD_Add("RECOVER", NULL, 0, cSystem, pNone);	
 /*cmd 处理*/		
-CMD_CmdExcute((char *)cmdIn, (char *)cmdEcho, Event);		
+CMD_CmdExcute((char *)cmdIn, (char *)cmdEcho, Event);	
+/**
+ * @description:处理指令事件
+ * @param      :cmd ，指令通知
+ * @return     :
+ */
+static void Event(char *cmd)
+{
+	//
+	if (strcasecmp(cmd, "save") == 0)
+	{
+		SaveProfile((uint8_t *)&_PROJECT_cfg, sizeof(_PROJECT_cfg));
+	}
+	//
+	if (strcasecmp(cmd, "backup") == 0)
+	{
+		BackupProfile(sizeof(_PROJECT_cfg));
+	}
+	//
+	if (strcasecmp(cmd, "recover") == 0)
+	{
+		RecoverProfile(sizeof(_PROJECT_cfg));
+		//wwdt
+		Reset_Systerm();
+	}
+
+	/*返回支持的指令（请勿修改），配合配置软件rtu_config_tool调用*/
+	if (strcasecmp(cmd, "help") == 0)
+	{
+		uint32_t count = CMD_GetCount();
+		sBindingInfo bi;
+		char cmdinfo[64]={0};
+		for (int i = 0; i < count; i++)
+		{
+			CMD_GetCmdInfo(i, &bi);
+			if (bi.cmdType == ctParam)
+			{
+				sprintf(cmdinfo,"%s,%d,%d\r\n",bi.cmd,bi.Size,bi.ValueType);
+				RC_RS485_Send(PROJECT_CFG_USART_ID, (uint8_t *)cmdinfo, strlen(cmdinfo));
+			}
+		}
+	}
+}	
 
 
