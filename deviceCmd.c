@@ -525,10 +525,15 @@ void CMD_Excute(char *cmd, char *echo, void(eventHandle(char *cmd)))
       return;
     }
     /*非查询指令且无配置参数则返回错误*/
-    if (!isQuery && strlen(params[0]) == 0)
+    if (!isQuery && params[0] == 0)
     {
-      strcpy(echo, "no parameter\r\n");
-      return;
+	if(_Bi[biIndex].ValueType ==pSTRING)
+		params[0]="";/*字符串无参数则赋值为空*/
+	else/*其他类型提示错误*/
+	{
+		strcpy(echo, "no parameter\r\n");
+		return;
+	}
     }
     /*按类型处理指令*/
     switch (_Bi[biIndex].ValueType)
